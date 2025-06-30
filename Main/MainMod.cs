@@ -8,6 +8,7 @@ using UnityEngine;
 using Banapuchin.Extensions;
 using Banapuchin.Libraries;
 using Banapuchin.Mods.Movement;
+using Il2Cpp;
 using Il2CppInterop.Runtime.Injection;
 using Il2CppLocomotion;
 using Il2CppTMPro;
@@ -31,8 +32,8 @@ namespace Banapuchin.Main
             foreach (var type in monoTypes)
                 ClassInjector.RegisterTypeInIl2Cpp(type);
 
-            Caputilla.Caputilla.Instance.OnModdedJoin += OnModdedJoin;
-            Caputilla.Caputilla.Instance.OnModdedLeave += OnModdedLeave;
+            CaputillaMelonLoader.CaputillaHub.OnModdedJoin += OnModdedJoin;
+            CaputillaMelonLoader.CaputillaHub.OnModdedLeave += OnModdedLeave;
         }
 
         private static void Init()
@@ -152,6 +153,22 @@ namespace Banapuchin.Main
 
         private static void CreateBalls()
         {
+            var comps = Player.Instance.GetComponentsInChildren<HandColliders>();
+            
+            Transform? leftFinger = null, rightFinger = null;
+            
+            foreach (var comp in comps)
+            {
+                if (comp.isLeftHand)
+                {
+                    leftFinger = comp.transform;
+                }
+                else
+                {
+                    rightFinger = comp.transform;
+                }
+            }
+            
             BallR = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             BallR.name = "RightBall";
             BallR.transform.localScale = new Vector3(0.02f, 0.02f, 0.02f);
@@ -159,7 +176,7 @@ namespace Banapuchin.Main
             BallR.SafelyAddComponent<Rigidbody>().isKinematic = true;
             BallR.GetComponent<SphereCollider>().isTrigger = true;
             BallR.transform.SetParent(Player.Instance.RightHand.transform);
-            BallR.transform.localPosition = new Vector3(-0.02f, -0.1f, 0.09f);
+            BallR.transform.position = rightFinger.position;
 
             BallL = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             BallL.name = "LeftBall";
@@ -168,7 +185,7 @@ namespace Banapuchin.Main
             BallL.SafelyAddComponent<Rigidbody>().isKinematic = true;
             BallL.GetComponent<SphereCollider>().isTrigger = true;
             BallL.transform.SetParent(Player.Instance.LeftHand.transform);
-            BallL.transform.localPosition = new Vector3(0.045f, -0.141f, 0.052f);
+            BallL.transform.position = leftFinger.position;
         }
 
         private static void LoadImageInto3DWorldSpace(string imagePath, Transform parent, Vector3 position,
@@ -222,7 +239,7 @@ namespace Banapuchin.Main
             {
                 Menu.GetComponent<Rigidbody>().isKinematic = true;
                 Menu.transform.SetParent(Player.Instance.playerCam.gameObject.transform);
-                Menu.transform.localPosition = new Vector3(0f, -0.04f, 0.6f);
+                Menu.transform.localPosition = new Vector3(0f, -0.04f, 0.5f);
                 Menu.transform.localRotation = Quaternion.Euler(270f, 180f, 0f);
                 Menu.transform.localScale = Vector3.one * 25f;
                 BallL.SetActive(true);
